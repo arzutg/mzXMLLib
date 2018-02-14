@@ -1,9 +1,8 @@
-#ifndef __MZXML_STRUCTURES_H__
-#define __MZXML_STRUCTURES_H__
+#ifndef MZXMLSTRUCTURES_H
+#define	MZXMLSTRUCTURES_H
 
-#ifdef __cplusplus
-extern "C"
-{
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 /* Processingoperation name value type */
@@ -37,12 +36,12 @@ typedef struct mzxml_peak_type
 	double* mzs;
 	double* intensities;
 	int     count;
-	int		precision;
+	int	precision;
 	char*	byteOrder;
 	char*	pairOrder;
 	char*	contentType;
 	char*	compressionType;
-	int		compressedLen;
+	int	compressedLen;
 
 } scan_peaks, *pscan_peaks;
 
@@ -155,17 +154,17 @@ typedef struct mzxml_dataprocessing_type
 	unsigned char centroided;		/* intean yes - no attribute */
 	unsigned char deisotoped;		/* intean yes - no attribute */
 	unsigned char deconvoluted;		/* intean yes - no attribute */
-	unsigned char spotintegration;	/* intean yes - no attribute specific to LC-MALDI */
+	unsigned char spotintegration;          /* intean yes - no attribute specific to LC-MALDI */
 
 	/* Structures */
-	char*  sw_type;				/* type of the software operation, either "conversion" or "processing" */
-	char*  sw_name;				/* name of the software tool used */
-	char*  sw_version;			/* version of the software package used */
+	char*  sw_type;			/* type of the software operation, either "conversion" or "processing" */
+	char*  sw_name;			/* name of the software tool used */
+	char*  sw_version;		/* version of the software package used */
 	double sw_completion_time;	/* xs:duration completion time entry. optional */
 
 	/* Ignored for now: */
 	pprocessingoperation	proc_op_array;	/* array of processing operation structures */
-	int						proc_op_count;	/* length of proc_op_array */
+	int proc_op_count;                      /* length of proc_op_array */
 
 } dataprocessing, *pdataprocessing;
 
@@ -173,7 +172,30 @@ typedef struct mzxml_dataprocessing_type
 /* msinstrument section */
 typedef struct mzxml_msinstrument_type
 {
-	char* content;
+	//char* content;
+
+        /* Structures */
+	char*  mm_category;	/* MS Manufacturer category */
+	char*  mm_value;        /* Name of the MS Manufacturer */
+
+        char*  mod_category;	/* MS Model category */
+	char*  mod_value;       /* Name of the MS Model */
+
+        char*  ion_category;	/* Ionisation category */
+	char*  ion_value;       /* Type of the ionisation */
+
+        char*  ma_category;	/* Mass analyzer category */
+	char*  ma_value;        /* Type of the mass analyzer */
+
+        char*  md_category;	/* Mass detector category */
+	char*  md_value;        /* Type of the mass detector */
+
+        char*  ins_sw_type;		/* type of the software */
+	char*  ins_sw_name;         /* name of the software */
+        char*  ins_sw_version;         /* version of the software */
+
+        char*  op_first;	/* operation first */
+	char*  op_last;         /* operation last */
 
 } msinstrument, *pmsinstrument;
 
@@ -191,50 +213,55 @@ typedef struct mzxml_parentfile_type
 /* mzxml file structure */
 typedef struct mzxml_file
 {
-	char*			file_name;				/* source file name/location of the mzxml file */
+	char*			file_name;		/* source file name/location of the mzxml file */
 
 	/*************************** MS RUN BEGIN **************************/
 	double			start_time;
 	double			end_time;
 	long			msrun_offset;
+        int                     ms_scan_count;
 
 	/* Structures */
-	long			parentfile_offset;		/* Offset of the section */
-	long			parentfile_length;		/* Length of the section */
-	pparentfile		parentfile_array;		/* Array of the parentfile structrure */
-	int				parentfile_count;		/* Parentfile array length */
+	long			parentfile_offset;	/* Offset of the section */
+	long			parentfile_length;	/* Length of the section */
+	pparentfile		parentfile_array;	/* Array of the parentfile structrure */
+	int			parentfile_count;	/* Parentfile array length */
 
 	long			msinstrument_offset;	/* Offset of potential msinstrument section */
 	long			msinstrument_length;	/* Length of the section */
-	pmsinstrument	msinstrument_array;		/* pointer to the msinstument section, if loaded */
-	int				msinstrument_count;		/* Msinstrument array length */
+	pmsinstrument           msinstrument_array;	/* pointer to the msinstument section, if loaded */
+	int			msinstrument_count;	/* Msinstrument array length */
 
 	long			dataprocessing_offset;	/* Offset of the section */
 	long			dataprocessing_length;	/* Length of the section */
-	pdataprocessing	dataprocessing_array;	/* Array of the dataprocessing structrure */
-	int				dataprocessing_count;	/* Dataprocessing array length */
+	pdataprocessing         dataprocessing_array;	/* Array of the dataprocessing structrure */
+	int                     dataprocessing_count;	/* Dataprocessing array length */
 
-	long			separation_offset;		/* Offset of the separation section */
-	long			separation_length;		/* Length of the separation section */
-	pseparation		separation;				/* pointer to the separation section, if loaded */
+	long			separation_offset;	/* Offset of the separation section */
+	long			separation_length;	/* Length of the separation section */
+	pseparation		separation;		/* pointer to the separation section, if loaded */
 
-	long			spotting_offset;		/* Offset of the spotting section */
-	long			spotting_length;		/* Length of the spotting section */
-	pspotting		spotting;				/* pointer to the spotting section, if loaded */
+	long			spotting_offset;	/* Offset of the spotting section */
+	long			spotting_length;	/* Length of the spotting section */
+	pspotting		spotting;               /* pointer to the spotting section, if loaded */
 
-	pscan*			scan_array;				/* Array of the scan structrures, size recorded in scan_count */
+	pscan*			scan_array;		/* Array of the scan structrures, size recorded in scan_count */
 	/*************************** MS RUN END **************************/
 
-	long			scan_end_offset;		/* offset at which the scan section ends */
-	long*			index_array;			/* array of indices. Arraylength is equal to the number of scans */
-	int				scan_num;				/* number of scans */
-	char*			index_name;				/* name of the index */
-	char*			sha1;					/* sha1 part */
+	long			scan_end_offset;	/* offset at which the scan section ends */
+	long*			index_array;		/* array of indices. Arraylength is equal to the number of scans */
+	int*                    scan_id_array;          /* original scan number */
+        int			scan_num;		/* number of scans */
+	char*			index_name;		/* name of the index */
+	char*			sha1;			/* sha1 part */
 
 } mzxml_file, *pmzxml_file;
 
-#ifdef __cplusplus
+
+
+#ifdef	__cplusplus
 }
 #endif
 
-#endif
+#endif	/* MZXMLSTRUCTURES_H */
+

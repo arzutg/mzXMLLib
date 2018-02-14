@@ -1,9 +1,8 @@
-#ifndef __MZXML_PARSERS_H__
-#define __MZXML_PARSERS_H__
+#ifndef MZXMLPARSER_H
+#define	MZXMLPARSER_H
 
-#ifdef __cplusplus
-extern "C"
-{
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 #include <stdio.h>
@@ -14,7 +13,7 @@ extern "C"
 #define SHORT_HEADER_BUFF_SIZE	4048	/* 4KB buffer size for short headers */
 #define INDEX_REV_BUFF_SIZE		24		/* 24 bytes reverse side size assumption */
 #define INDEX_ELT_BUFF_SIZE		60		/* 60 bytes to find last index element */
-#define READ_BUFF_SIZE			32768	/* 32KB reading buffer as standard */
+#define READ_BUFF_SIZE			131072	/* 32KB reading buffer as standard */
 
 
 /****************************************** Hidden parsing functions ***********************************************/
@@ -29,6 +28,8 @@ void parse_parentfile_structure(pmzxml_file file, char* beginptr, FILE* finput);
 
 /* Parses the entire msinstrument structure */
 void parse_msinstrument_structure(pmzxml_file file, char* beginptr, FILE* finput);
+
+msinstrument parse_msinstrument_element(char* beginptr, FILE* finput);
 
 /* Parses the entire dataprocessing structure. */
 void parse_dataprocessing_structure(pmzxml_file file, char* beginptr, FILE* finput);
@@ -55,7 +56,7 @@ void parse_scan_attributes(pscan scan, char* content);
 void parse_scanorigin_structure(pscan scan, char* contents, FILE* finput);
 
 /* Filters the info of a single scanorigin entry */
-scan_origin parse_origin(char* content);
+//scan_origin parse_origin(char* content);
 
 /* Function that scans the precursor structure */
 void parse_precursor_structure(pscan scan, char* beginptr, FILE* finput);
@@ -85,8 +86,9 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput);
 void parse_file_tail(pmzxml_file mzxml_file, FILE* finput);
 
 
-#ifdef __cplusplus
+#ifdef	__cplusplus
 }
 #endif
 
-#endif
+#endif	/* MZXMLPARSER_H */
+

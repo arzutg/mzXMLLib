@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "mzXMLDefs.h"
 #include "mzXMLParser.h"
@@ -13,6 +14,7 @@ static long  read_chars = 0;
 static char* walkptr = NULL;
 
 static int parentfile_alloc_count = 1;
+static int msinstrument_alloc_count = 1;
 static int dataprocessing_alloc_count = 1;
 static int proc_op_alloc_count = 1;
 static int origin_alloc_count = 1;
@@ -25,13 +27,14 @@ static int scan_index_begin = -1;
 static int calc_encoding_length(pscan_peaks sp)
 {
 	int len;
-	if (sp->compressedLen >= 0)
+
+        if (sp->compressedLen >= 0)
 		return sp->compressedLen;
 	else {
 		len = ((sp->count) * 2) * (sp->precision/8);
-
 		return (((2 + len - ((len + 2) % 3)) * 4) / 3);
-	}/* else */
+	}
+
 
 }/* int calc_encoding_length(pscan_peaks sp) */
 
@@ -51,9 +54,10 @@ static unsigned int ntohl(int nLongNumber)
 /* Parses the comlete mzXML file */;
 void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan)
 {
-	int topscan, i;
-
-	parse_file_tail(file, finput);
+	int i, k, scan_order_lower, scan_order_upper;
+        char *tag;
+	//breakpoint
+        parse_file_tail(file, finput);
 	parse_index_sequence(file, finput);
 	parse_scan_end(file, finput);
 	parse_msrun_header(file, finput, fflags);
@@ -61,12 +65,61 @@ void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_co
 	file->scan_array = (pscan*) malloc(file->scan_num * sizeof(pscan));
 	memset(file->scan_array, 0, file->scan_num * sizeof(pscan));
 
-	topscan = (end_scan < file->scan_num? end_scan: file->scan_num);
-	for (i=begin_scan; i<=topscan; i++) {
+        printf("\nJUST CHECKING!\n"); fflush(stdout);
+
+        printf("scan_num: %i\n", file->scan_num); fflush(stdout);
+        printf("scan_id_array[2]: %i\n", file->scan_id_array[2]); fflush(stdout);
+
+        //Checking and correcting scan intervals w.r.t. scan array of the file
+        //if the end scan given by the user is above or equal to the last scan in the file
+        if(end_scan > file->scan_id_array[file->scan_num-1]){
+           scan_order_upper = file->scan_num - 1;
+           end_scan = file->scan_id_array[scan_order_upper];
+           printf("\nEnd scan provided is too big! Replacing it with the last scan id in the file..."); fflush(stdout);
+        }
+        //if the end scan is below the first scan in the file
+        else if(end_scan < file->scan_id_array[0] ){
+            printf("\nEnd scan provided is outside the scan range! Program exiting..."); fflush(stdout);
+        }
+        //find the corresponding upper bound of scan order
+        else{
+            for (k=0; k<file->scan_num; k++){
+                if(end_scan < file->scan_id_array[k]){
+                    scan_order_upper = k-1;
+                    end_scan = file->scan_id_array[scan_order_upper];
+                    break;
+                }
+            }
+        }
+        //if the begin scan given by the user is below the first scan id in the file
+        if(begin_scan < file->scan_id_array[0]){
+           scan_order_lower = 0;
+           begin_scan = file->scan_id_array[0];
+           printf("\nBegin scan provided is too small! Replacing it with the first scan id in the file..."); fflush(stdout);
+        }
+        else if(begin_scan > file->scan_id_array[file->scan_num-1]){
+            printf("\nBegin scan provided is outside the scan range! Program exiting..."); fflush(stdout);
+        }
+        else {
+            for (k=0; k<file->scan_num; k++){
+                if(begin_scan <= file->scan_id_array[k]){
+                    scan_order_lower = k-1;
+                    begin_scan = file->scan_id_array[scan_order_lower];
+                    break;
+                }
+            }
+        }
+
+        if(begin_scan > end_scan){
+            printf("\nNo scans found within the given range! Program exiting..."); fflush(stdout);
+        }
+
+        printf("\nEnd scan = %i, Begin scan = %i\n", end_scan, begin_scan); fflush(stdout);
+        printf("Scan order upper = %i, Scan order lower = %i\n", scan_order_upper, scan_order_lower); fflush(stdout);
+	for (i=scan_order_lower; i<=scan_order_upper; i++) {
 		file->scan_array[i-1] = (pscan) malloc(sizeof(scan));
 		parse_scan_header(file, i, finput, sflags);
-	}/* for */
-
+	}
 }/* void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan) */
 
 
@@ -154,11 +207,11 @@ void parse_msrun_header(pmzxml_file file, FILE* finput, file_flags fflags)
 	set_msrun_header_defaults(file);
 
 	tag = get_xml_tag(read_buffer, &walkptr, finput, SHORT_HEADER_BUFF_SIZE, &offset);
-	test = offset + ((int)tag - (int)read_buffer);
+	test = offset + (tag - read_buffer);
 	while (strstr(tag, MZXML_SCAN_OTAG) == NULL) {
 		/* Find msrun tag, so filling attributes */
 		if (strstr(tag, MZXML_MSRUN_OTAG)) {
-			file->msrun_offset = offset + ((int)tag - (int)read_buffer);
+			file->msrun_offset = offset + (tag - read_buffer);
 			tmpbuffer = get_xml_attribute_value(tag, MZXML_MSRUN_ATTRIB_STARTTIME);
 			if (tmpbuffer) {
 				file->start_time = xml_duration_to_seconds(tmpbuffer);
@@ -169,35 +222,42 @@ void parse_msrun_header(pmzxml_file file, FILE* finput, file_flags fflags)
 				file->end_time = xml_duration_to_seconds(tmpbuffer);
 				free(tmpbuffer);
 			}/* if */
+                        tmpbuffer = get_xml_attribute_value(tag, MZXML_MSRUN_ATTRIB_SCANCOUNT);
+			if (tmpbuffer) {
+				file->ms_scan_count = atoi(tmpbuffer);
+				free(tmpbuffer);
+			}/* if */
 		}/* if */
 		/* Parsing the parentfile structure */
 		else if (strstr(tag, MZXML_PARENTFILE_OTAG)) {
 			if (file->parentfile_offset < 0)
-				file->parentfile_offset = offset + ((int)tag - (int)read_buffer);
+				file->parentfile_offset = offset + (tag - read_buffer);
 			if (fflags & parentfile_flag)
 				parse_parentfile_structure(file, tag, finput);
 		}/* else if */
 		else if (strstr(tag, MZXML_MSINSTRUMENT_OTAG)) {
 			if (file->msinstrument_offset < 0)
-				file->msinstrument_offset = offset + ((int)tag - (int)read_buffer);
-			if (fflags & instrument_flag)
+				file->msinstrument_offset = offset + (tag - read_buffer);
+			if (fflags & instrument_flag){
 				parse_msinstrument_structure(file, tag, finput);
+                        }
 		}/* else if */
 		else if (strstr(tag, MZXML_DATAPROCESSING_OTAG)) {
 			if (file->dataprocessing_offset < 0)
-				file->dataprocessing_offset = offset + ((int)tag - (int)read_buffer);
-			if (fflags & dataprocessing_flag)
+				file->dataprocessing_offset = offset + (tag - read_buffer);
+			if (fflags & dataprocessing_flag){
 				parse_dataprocessing_structure(file, tag, finput);
+                        }
 		}/* else if */
 		else if (strstr(tag, MZXML_SEPARATION_OTAG)) {
 			if (file->separation_offset < 0)
-				file->separation_offset = offset + ((int)tag - (int)read_buffer);
+				file->separation_offset = offset + (tag - read_buffer);
 			if (fflags & separation_flag)
 				parse_separation_structure(file, tag, finput);
 		}/* else if */
 		else if (strstr(tag, MZXML_SPOTTING_OTAG)) {
 			if (file->spotting_offset < 0)
-				file->spotting_offset = offset + ((int)tag - (int)read_buffer);
+				file->spotting_offset = offset + (tag - read_buffer);
 			if (fflags & spotting_flag)
 				parse_spotting_structure(file, tag, finput);
 		}/* else if */
@@ -205,7 +265,7 @@ void parse_msrun_header(pmzxml_file file, FILE* finput, file_flags fflags)
 	}/* while */
 
 	/* Calculating lengths of segments */
-	set_msrun_lengths(file, offset + ((int)tag - (int)read_buffer));
+	set_msrun_lengths(file, offset + (tag - read_buffer));
 
 	/* Adjusting the size of all created arrays to reflect their actual length */
 	if (file->parentfile_count > 0)
@@ -244,8 +304,68 @@ void parse_parentfile_structure(pmzxml_file file, char* beginptr, FILE* finput)
 /* Parses the entire msinstrument structure TO BE IMPLEMENTED */
 void parse_msinstrument_structure(pmzxml_file file, char* beginptr, FILE* finput)
 {
+        if (!(file->msinstrument_array)) {
+		file->msinstrument_array = malloc(sizeof(msinstrument));
+		file->msinstrument_count = 0;
+	}/* if */
+
+        //parse_msinstrument_element(beginptr, finput);
+        /* Retrieving the msinstrument attributes */
+	file->msinstrument_array[file->msinstrument_count] = parse_msinstrument_element(beginptr, finput);
+
+        /* Updating counters and making more room for future structures */
+	file->msinstrument_count += 1;
+	if (file->msinstrument_count == dataprocessing_alloc_count) {
+		msinstrument_alloc_count *= 2;
+		file->msinstrument_array = realloc(file->msinstrument_array, msinstrument_alloc_count * sizeof(msinstrument));
+	}/* if */
+
 
 }/* pmsinstrument get_msinstrument_structure(pmzxml_file file, int* msinstrument_count) */
+
+/* Parses a single dataprocessing element */
+msinstrument parse_msinstrument_element(char* beginptr, FILE* finput)
+{
+	msinstrument mi;
+	char* tmpbuffer, *tag;
+
+	tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
+	while (strstr(tag, MZXML_MSINSTRUMENT_CTAG) == NULL) {
+		if (strstr(tag, MZXML_MSMANUFACTURER_OTAG)) {
+			mi.mm_category = get_xml_attribute_value(tag, MZXML_MSMANUFACTURER_ATTRIB_CATEGORY);
+			mi.mm_value = get_xml_attribute_value(tag, MZXML_MSMANUFACTURER_ATTRIB_VALUE);
+		}
+		else if (strstr(tag, MZXML_MSMODEL_OTAG)) {
+                        mi.mod_category = get_xml_attribute_value(tag, MZXML_MSMODEL_ATTRIB_CATEGORY);
+                        mi.mod_value  = get_xml_attribute_value(tag, MZXML_MSMODEL_ATTRIB_VALUE);
+		}
+		else if (strstr(tag, MZXML_MSIONISATION_OTAG)) {
+                        mi.ion_category = get_xml_attribute_value(tag, MZXML_MSIONISATION_ATTRIB_CATEGORY);
+                        mi.ion_value = get_xml_attribute_value(tag, MZXML_MSIONISATION_ATTRIB_VALUE);
+		}
+                else if (strstr(tag, MZXML_MSMASSANALYZER_OTAG)) {
+                        mi.ma_category = get_xml_attribute_value(tag, MZXML_MSMASSANALYZER_ATTRIB_CATEGORY);
+                        mi.ma_value = get_xml_attribute_value(tag, MZXML_MSMASSANALYZER_ATTRIB_VALUE);
+		}
+                else if (strstr(tag, MZXML_MSDETECTOR_OTAG)) {
+                        mi.md_category = get_xml_attribute_value(tag, MZXML_MSDETECTOR_ATTRIB_CATEGORY);
+                        mi.md_value = get_xml_attribute_value(tag, MZXML_MSDETECTOR_ATTRIB_VALUE);
+		}
+                else if (strstr(tag, MZXML_INSTRUMENT_SOFTWARE_OTAG)) {
+                        mi.ins_sw_type  = get_xml_attribute_value(tag, MZXML_INSTRUMENT_SOFTWARE_ATTRIB_TYPE);
+                        mi.ins_sw_name  = get_xml_attribute_value(tag, MZXML_INSTRUMENT_SOFTWARE_ATTRIB_NAME);
+                        mi.ins_sw_version  = get_xml_attribute_value(tag, MZXML_INSTRUMENT_SOFTWARE_ATTRIB_VERSION);
+		}
+                else if (strstr(tag, MZXML_OPERATOR_OTAG)) {
+                        mi.op_first  = get_xml_attribute_value(tag, MZXML_OPERATOR_ATTRIB_FIRST);
+                        mi.op_last   = get_xml_attribute_value(tag, MZXML_OPERATOR_ATTRIB_LAST);
+		}
+		tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
+	}
+
+	return mi;
+
+}
 
 
 /* Parses the dataprocessing structure */
@@ -480,19 +600,19 @@ void parse_scan_header(pmzxml_file file, int scan_number, FILE* finput, scan_con
 		}/* if */
 		else if (strstr(tag, MZXML_SCANORIGIN_OTAG)) {
 			if (curr_scan->origin_offset < 0)
-				curr_scan->origin_offset = offset + ((int)tag - (int)read_buffer);
+				curr_scan->origin_offset = offset + (tag - read_buffer);
 			if (sflags & scan_origin_flag)
 				parse_scanorigin_structure(curr_scan, tag, finput);
 		}/* else if */
 		else if (strstr(tag, MZXML_PRECURSORMZ_OTAG)) {
 			if (curr_scan->precursor_offset < 0)
-				curr_scan->precursor_offset = offset + ((int)tag - (int)read_buffer);
+				curr_scan->precursor_offset = offset + (tag - read_buffer);
 			if (sflags & scan_precursor_flag)
 				parse_precursor_structure(curr_scan, tag, finput);
 		}/* else if */
 		else if (strstr(tag, MZXML_MALDI_OTAG)) {
 			if (curr_scan->maldi_offset < 0)
-				curr_scan->maldi_offset = offset + ((int)tag - (int)read_buffer);
+				curr_scan->maldi_offset = offset + (tag - read_buffer);
 			if (sflags & scan_maldi_flag)
 				parse_maldi_structure(curr_scan, tag, finput);
 		}/* else if */
@@ -500,8 +620,8 @@ void parse_scan_header(pmzxml_file file, int scan_number, FILE* finput, scan_con
 	}/* while */
 
 	/* Doing some bookkeeping for offsets and lengths */
-	curr_scan->peak_offset = offset + ((int)tag - (int)read_buffer);
-	curr_scan->peak_content_offset = offset + ((int)walkptr - (int)read_buffer);
+	curr_scan->peak_offset = offset + (tag - read_buffer);
+	curr_scan->peak_content_offset = offset + (walkptr - read_buffer);
 
 	/* Parsing the scan header */
 	parse_scan_peaks_header(curr_scan, tag);
@@ -524,7 +644,7 @@ void parse_scan_header(pmzxml_file file, int scan_number, FILE* finput, scan_con
 	while (strstr(tag, MZXML_SCAN_CTAG) == NULL && strstr(tag, MZXML_SCAN_OTAG) == NULL) {
 		if (strstr(tag, MZXML_NAMEVALUE_OTAG)) {
 			if (curr_scan->namevalue_offset < 0)
-				curr_scan->namevalue_offset = offset + ((int)tag - (int)read_buffer);
+				curr_scan->namevalue_offset = offset + (tag - read_buffer);
 			parse_namevalue_structure(curr_scan, tag, finput);
 		}/* if */
 		else if (strstr(tag, MZXML_COMMENT_OTAG)) {
@@ -534,7 +654,7 @@ void parse_scan_header(pmzxml_file file, int scan_number, FILE* finput, scan_con
 	}/* while */
 
 	/* Calculating the lengths of all segments */
-	set_scan_lengths(curr_scan, offset + ((int)tag - (int)read_buffer));
+	set_scan_lengths(curr_scan, offset + (tag - read_buffer));
 
 	/* Doing some bookkeeping on the lengths of the arrarys created */
 	if (curr_scan->origin_count > 0)
@@ -844,17 +964,25 @@ void parse_scan_peaks(pscan scan, char* beginptr, FILE* finput)
 	scan->peaks->mzs = malloc(scan->peaks->count * sizeof(double));
 	scan->peaks->intensities = malloc(scan->peaks->count * sizeof(double));
 	len = calc_encoding_length(scan->peaks);
+        printf("\nEncoding length: %i\n",len); fflush(stdout);
 	tmpbuffer = decode_b64(beginptr, len+1, &newlen);
+        printf("beginptr: %s\n",beginptr); fflush(stdout);
 
 	if (scan->peaks->precision == 32) {
 		flcastpointer = (float*)tmpbuffer;
 		intcastpointer = (int*)tmpbuffer;
 
 		for (i=0; i<scan->peaks->count; i++) {
+                //for (i=0; i<5; i++) {
 			intcastpointer[2*i] = ntohl((unsigned int)intcastpointer[2*i]);
 			intcastpointer[(2*i)+1] = ntohl((unsigned int)intcastpointer[(2*i)+1]);
 			scan->peaks->mzs[i] = (double)(flcastpointer[(2*i)]);
 			scan->peaks->intensities[i] = (double)(flcastpointer[(2*i)+1]);
+
+                        //printf("MZS: %f\n",scan->peaks->mzs[i]); fflush(stdout);
+                        //printf("INT: %f\n", scan->peaks->intensities[i]); fflush(stdout);
+                        //printf("CONTENT: %s\n", scan->peaks->contentType); fflush(stdout);
+
 		}// for
 		free(tmpbuffer);
 	}// if
@@ -940,7 +1068,7 @@ void parse_scan_end(pmzxml_file mzxml_file, FILE* finput)
 		tmpbuffer = strstr(tmpbuffer+1, MZXML_SCAN_CTAG);
 	}/* while */
 
-	mzxml_file->scan_end_offset =  scan_index_begin-SHORT_HEADER_BUFF_SIZE + ((int)prevbuffer - (int)read_buffer) + strlen(MZXML_SCAN_CTAG) + 1;
+	mzxml_file->scan_end_offset =  scan_index_begin-SHORT_HEADER_BUFF_SIZE + (prevbuffer - read_buffer) + strlen(MZXML_SCAN_CTAG) + 1;
 
 }/* void parse_scan_end(pmzxml_file mzxml_file, FILE* finput) */
 
@@ -958,9 +1086,13 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput)
 	walkptr = read_buffer;
 
 	mzxml_file->index_array = malloc(alloc_count * sizeof(long));
+        mzxml_file->scan_id_array = malloc(alloc_count * sizeof(int));
 	mzxml_file->scan_num = 0;
+        //If there are no scans within the boundary this returns 0
+        mzxml_file->scan_id_array[0] = 0;
 
-	tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
+	//breakpoint
+        tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
 	while (strstr(tag, MZXML_CTAG) == NULL) {
 		/* finding index tag */
 		if (strstr(tag, MZXML_INDEX_OTAG)) {
@@ -969,17 +1101,22 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput)
 		else if (strstr(tag, MZXML_OFFSET_OTAG)) {
 			tmpbuffer = get_xml_tag_value(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
 			mzxml_file->index_array[mzxml_file->scan_num] = atol(tmpbuffer);
+                        tmpbuffer = get_xml_attribute_value(tag, MZXML_OFFSET_ATTRIB_ID);
+                        mzxml_file->scan_id_array[mzxml_file->scan_num] = atol(tmpbuffer);
+                        printf("\n-Offset id: %i\tScan:%i", atol(tmpbuffer), mzxml_file->scan_num); fflush(stdout);
 			mzxml_file->scan_num += 1;
 			free(tmpbuffer);
 			if (mzxml_file->scan_num == alloc_count) {
 				alloc_count *= 2;
 				mzxml_file->index_array = realloc(mzxml_file->index_array, alloc_count * sizeof(long));
+                                mzxml_file->scan_id_array = realloc(mzxml_file->scan_id_array, alloc_count * sizeof(int));
 			}/* if */
 		}/* else if */
 		tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
 	}/* while */
 
 	mzxml_file->index_array = realloc(mzxml_file->index_array, mzxml_file->scan_num * sizeof(long));
+        mzxml_file->scan_id_array = realloc(mzxml_file->scan_id_array, mzxml_file->scan_num * sizeof(int));
 
 }/* void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput) */
 
@@ -1018,4 +1155,6 @@ void parse_file_tail(pmzxml_file mzxml_file, FILE* finput)
 	}/* while */
 
 }/* void parse_file_tail(pmzxml_file mzxml_file, FILE* finput) */
+
+
 

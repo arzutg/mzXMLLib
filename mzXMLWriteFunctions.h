@@ -1,9 +1,8 @@
-#ifndef __MZXML_WRITE_FUNCTIONS_H__
-#define __MZXML_WRITE_FUNCTIONS_H__
+#ifndef MZXMLWRITEFUNCTIONS_H
+#define	MZXMLWRITEFUNCTIONS_H
 
-#ifdef __cplusplus
-extern "C"
-{
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 #include <stdio.h>
@@ -70,8 +69,10 @@ void print_indices(pmzxml_file mzxml_file_hndl, FILE* fout);
 /* Writes the index offset structure */
 void print_index_offset(pmzxml_file mzxml_file_hndl, FILE* fout);
 
-#ifdef __cplusplus
+
+#ifdef	__cplusplus
 }
 #endif
 
-#endif
+#endif	/* MZXMLWRITEFUNCTIONS_H */
+

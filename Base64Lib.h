@@ -5,12 +5,11 @@
  *      Author: PC714
  */
 
-#ifndef BASE64LIB_H_
-#define BASE64LIB_H_
+#ifndef BASE64LIB_H
+#define	BASE64LIB_H
 
-#ifdef __cplusplus
-extern "C"
-{
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 #define MAX_ENC_CHAR_VALUE	64
@@ -22,8 +21,10 @@ char* encode_b64(unsigned char *input_buffer, char *output_buffer, int ibuff_len
 /* Encoding function. Extends and overwrites existing buffer */
 char* decode_b64(unsigned char *input_buffer, int buff_len, int *new_len);
 
-#ifdef __cplusplus
+
+#ifdef	__cplusplus
 }
 #endif
 
-#endif /* BASE64LIB_H_ */
+#endif	/* BASE64LIB_H */
+

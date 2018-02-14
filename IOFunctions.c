@@ -4,9 +4,14 @@
 
 #include "IOFunctions.h"
 
+float rmin(float l, float r) {
+	if (l <= r)
+		return l;
+	return r;
+}
 
 /* Updates the contents of a buffer by copying the bufpos residu to the beginning, and adding the rest from file */
-int update_mzxml_buffer(char* buffer, char* bufpos, FILE* file_handle, int buffersize)
+int update_xml_buffer(char* buffer, char* bufpos, FILE* file_handle, int buffersize)
 {
 	int residu, read;
 
@@ -21,4 +26,22 @@ int update_mzxml_buffer(char* buffer, char* bufpos, FILE* file_handle, int buffe
 
 	return read;
 
-}/* void update_buffer(char* buffer, char* bufpos, FILE* file_handle, int buffersize) */
+}
+
+/* Copies data from the input file to the output file */
+void copy_input_output(char* buffer, int buf_len, FILE* inputf, FILE* outputf, int copy_len)
+{
+	int copies, i, read_chars, toberead;
+
+	copies = (copy_len / (buf_len-1)) + 1;
+	for (i=0; i<copies; i++) {
+		toberead = rmin(copy_len, buf_len-1);
+		read_chars = fread(buffer, sizeof(char), toberead+1, inputf);
+		buffer[read_chars] = '\0';
+		fprintf(outputf, "%s", buffer);
+		copy_len -= toberead;
+	}// for
+
+}
+
+

@@ -1,4 +1,4 @@
-15:20:49 **** Build of configuration Debug for project mzXMLLib ****
+16:51:21 **** Build of configuration Debug for project mzXMLLib ****
 make all 
 Building file: ../src/Base64Lib.c
 Invoking: Cygwin C Compiler
@@ -18,7 +18,7 @@ gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/SHA.d" -MT"src/SHA.o" -
              SHA1Input(&sha, &c, 1);
                              ^
 In file included from ../src/SHA.c:28:0:
-../src/SHA1.h:50:6: note: expected 'const unsigned char *' but argument is of type 'char *'
+../src/SHA1.h:54:6: note: expected 'const unsigned char *' but argument is of type 'char *'
  void SHA1Input( SHA1Context *,
       ^~~~~~~~~
 Finished building: ../src/SHA.c
@@ -41,116 +41,30 @@ Finished building: ../src/XMLFunctions.c
 Building file: ../src/mzXMLParser.c
 Invoking: Cygwin C Compiler
 gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/mzXMLParser.d" -MT"src/mzXMLParser.o" -o "src/mzXMLParser.o" "../src/mzXMLParser.c"
+../src/mzXMLParser.c: In function 'parse_mzxml_file':
+../src/mzXMLParser.c:58:15: warning: unused variable 'tag' [-Wunused-variable]
+         char *tag;
+               ^~~
 ../src/mzXMLParser.c: In function 'parse_msrun_header':
-../src/mzXMLParser.c:157:19: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  test = offset + ((int)tag - (int)read_buffer);
-                   ^
-../src/mzXMLParser.c:157:30: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  test = offset + ((int)tag - (int)read_buffer);
-                              ^
-../src/mzXMLParser.c:161:35: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-    file->msrun_offset = offset + ((int)tag - (int)read_buffer);
-                                   ^
-../src/mzXMLParser.c:161:46: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-    file->msrun_offset = offset + ((int)tag - (int)read_buffer);
-                                              ^
-../src/mzXMLParser.c:176:41: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->parentfile_offset = offset + ((int)tag - (int)read_buffer);
-                                         ^
-../src/mzXMLParser.c:176:52: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->parentfile_offset = offset + ((int)tag - (int)read_buffer);
-                                                    ^
-../src/mzXMLParser.c:182:43: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->msinstrument_offset = offset + ((int)tag - (int)read_buffer);
-                                           ^
-../src/mzXMLParser.c:182:54: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->msinstrument_offset = offset + ((int)tag - (int)read_buffer);
-                                                      ^
-../src/mzXMLParser.c:188:45: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->dataprocessing_offset = offset + ((int)tag - (int)read_buffer);
-                                             ^
-../src/mzXMLParser.c:188:56: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->dataprocessing_offset = offset + ((int)tag - (int)read_buffer);
-                                                        ^
-../src/mzXMLParser.c:194:41: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->separation_offset = offset + ((int)tag - (int)read_buffer);
-                                         ^
-../src/mzXMLParser.c:194:52: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->separation_offset = offset + ((int)tag - (int)read_buffer);
-                                                    ^
-../src/mzXMLParser.c:200:39: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->spotting_offset = offset + ((int)tag - (int)read_buffer);
-                                       ^
-../src/mzXMLParser.c:200:50: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     file->spotting_offset = offset + ((int)tag - (int)read_buffer);
-                                                  ^
-../src/mzXMLParser.c:208:36: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  set_msrun_lengths(file, offset + ((int)tag - (int)read_buffer));
-                                    ^
-../src/mzXMLParser.c:208:47: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  set_msrun_lengths(file, offset + ((int)tag - (int)read_buffer));
-                                               ^
-../src/mzXMLParser.c:145:6: warning: variable 'test' set but not used [-Wunused-but-set-variable]
+../src/mzXMLParser.c:198:6: warning: variable 'test' set but not used [-Wunused-but-set-variable]
   int test;
       ^~~~
-../src/mzXMLParser.c: In function 'parse_scan_header':
-../src/mzXMLParser.c:483:42: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->origin_offset = offset + ((int)tag - (int)read_buffer);
-                                          ^
-../src/mzXMLParser.c:483:53: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->origin_offset = offset + ((int)tag - (int)read_buffer);
-                                                     ^
-../src/mzXMLParser.c:489:45: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->precursor_offset = offset + ((int)tag - (int)read_buffer);
-                                             ^
-../src/mzXMLParser.c:489:56: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->precursor_offset = offset + ((int)tag - (int)read_buffer);
-                                                        ^
-../src/mzXMLParser.c:495:41: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->maldi_offset = offset + ((int)tag - (int)read_buffer);
-                                         ^
-../src/mzXMLParser.c:495:52: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->maldi_offset = offset + ((int)tag - (int)read_buffer);
-                                                    ^
-../src/mzXMLParser.c:503:37: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  curr_scan->peak_offset = offset + ((int)tag - (int)read_buffer);
-                                     ^
-../src/mzXMLParser.c:503:48: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  curr_scan->peak_offset = offset + ((int)tag - (int)read_buffer);
-                                                ^
-../src/mzXMLParser.c:504:45: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  curr_scan->peak_content_offset = offset + ((int)walkptr - (int)read_buffer);
-                                             ^
-../src/mzXMLParser.c:504:60: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  curr_scan->peak_content_offset = offset + ((int)walkptr - (int)read_buffer);
-                                                            ^
-../src/mzXMLParser.c:527:45: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->namevalue_offset = offset + ((int)tag - (int)read_buffer);
-                                             ^
-../src/mzXMLParser.c:527:56: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-     curr_scan->namevalue_offset = offset + ((int)tag - (int)read_buffer);
-                                                        ^
-../src/mzXMLParser.c:537:40: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  set_scan_lengths(curr_scan, offset + ((int)tag - (int)read_buffer));
-                                        ^
-../src/mzXMLParser.c:537:51: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  set_scan_lengths(curr_scan, offset + ((int)tag - (int)read_buffer));
-                                                   ^
+../src/mzXMLParser.c: In function 'parse_msinstrument_element':
+../src/mzXMLParser.c:330:8: warning: unused variable 'tmpbuffer' [-Wunused-variable]
+  char* tmpbuffer, *tag;
+        ^~~~~~~~~
 ../src/mzXMLParser.c: In function 'parse_scan_peaks':
-../src/mzXMLParser.c:847:25: warning: pointer targets in passing argument 1 of 'decode_b64' differ in signedness [-Wpointer-sign]
+../src/mzXMLParser.c:968:25: warning: pointer targets in passing argument 1 of 'decode_b64' differ in signedness [-Wpointer-sign]
   tmpbuffer = decode_b64(beginptr, len+1, &newlen);
                          ^~~~~~~~
-In file included from ../src/mzXMLParser.c:8:0:
-../src/Base64Lib.h:23:7: note: expected 'unsigned char *' but argument is of type 'char *'
+In file included from ../src/mzXMLParser.c:9:0:
+../src/Base64Lib.h:22:7: note: expected 'unsigned char *' but argument is of type 'char *'
  char* decode_b64(unsigned char *input_buffer, int buff_len, int *new_len);
        ^~~~~~~~~~
-../src/mzXMLParser.c: In function 'parse_scan_end':
-../src/mzXMLParser.c:943:76: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  mzxml_file->scan_end_offset =  scan_index_begin-SHORT_HEADER_BUFF_SIZE + ((int)prevbuffer - (int)read_buffer) + strlen(MZXML_SCAN_CTAG) + 1;
-                                                                            ^
-../src/mzXMLParser.c:943:94: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
-  mzxml_file->scan_end_offset =  scan_index_begin-SHORT_HEADER_BUFF_SIZE + ((int)prevbuffer - (int)read_buffer) + strlen(MZXML_SCAN_CTAG) + 1;
-                                                                                              ^
+../src/mzXMLParser.c: In function 'parse_index_sequence':
+../src/mzXMLParser.c:1106:48: warning: format '%i' expects argument of type 'int', but argument 2 has type 'long int' [-Wformat=]
+                         printf("\n-Offset id: %i\tScan:%i", atol(tmpbuffer), mzxml_file->scan_num); fflush(stdout);
+                                                ^
 Finished building: ../src/mzXMLParser.c
  
 Building file: ../src/mzXMLReader.c
@@ -183,5 +97,5 @@ ar: creating libmzXMLLib.a
 Finished building target: libmzXMLLib.a
  
 
-15:20:58 Build Finished (took 9s.701ms)
+16:51:33 Build Finished (took 11s.846ms)
 

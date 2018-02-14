@@ -1,5 +1,9 @@
-#ifndef __MZXML_DEFS_H__
-#define __MZXML_DEFS_H__
+#ifndef MZXMLDEFS_H
+#define	MZXMLDEFS_H
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /* Global tags and chars */
 #define MZXML_ATTRIB_OTAG "\""
@@ -33,6 +37,42 @@
 /* msInstrument delimiters */
 #define MZXML_MSINSTRUMENT_OTAG "<msInstrument"
 #define MZXML_MSINSTRUMENT_CTAG "</msInstrument"
+
+/* msManufacturer section */
+#define MZXML_MSMANUFACTURER_OTAG "<msManufacturer"
+#define MZXML_MSMANUFACTURER_ATTRIB_CATEGORY "category"
+#define MZXML_MSMANUFACTURER_ATTRIB_VALUE "value"
+
+/* msModel section */
+#define MZXML_MSMODEL_OTAG "<msModel"
+#define MZXML_MSMODEL_ATTRIB_CATEGORY "category"
+#define MZXML_MSMODEL_ATTRIB_VALUE "value"
+
+/* msIonisation section */
+#define MZXML_MSIONISATION_OTAG "<msIonisation"
+#define MZXML_MSIONISATION_ATTRIB_CATEGORY "category"
+#define MZXML_MSIONISATION_ATTRIB_VALUE "value"
+
+/* msMassAnalyzer section */
+#define MZXML_MSMASSANALYZER_OTAG "<msMassAnalyzer"
+#define MZXML_MSMASSANALYZER_ATTRIB_CATEGORY "category"
+#define MZXML_MSMASSANALYZER_ATTRIB_VALUE "value"
+
+/* msDetector section */
+#define MZXML_MSDETECTOR_OTAG "<msDetector"
+#define MZXML_MSDETECTOR_ATTRIB_CATEGORY "category"
+#define MZXML_MSDETECTOR_ATTRIB_VALUE "value"
+
+/* msInstrument software section */
+#define MZXML_INSTRUMENT_SOFTWARE_OTAG "<software"
+#define MZXML_INSTRUMENT_SOFTWARE_ATTRIB_TYPE "type"
+#define MZXML_INSTRUMENT_SOFTWARE_ATTRIB_NAME "name"
+#define MZXML_INSTRUMENT_SOFTWARE_ATTRIB_VERSION "version"
+
+ /* operator section */
+#define MZXML_OPERATOR_OTAG "<operator"
+#define MZXML_OPERATOR_ATTRIB_FIRST "first"
+#define MZXML_OPERATOR_ATTRIB_LAST "last"
 
 /* dataProcessing section */
 #define MZXML_DATAPROCESSING_OTAG "<dataProcessing"
@@ -150,4 +190,10 @@
 #define MZXML_INDEXOFFSET_OTAG "<indexOffset"
 #define MZXML_INDEXOFFSET_CTAG "</indexOffset"
 
+
+#ifdef	__cplusplus
+}
 #endif
+
+#endif	/* MZXMLDEFS_H */
+

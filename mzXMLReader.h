@@ -1,9 +1,8 @@
-#ifndef __MZXML_READER_H__
-#define __MZXML_READER_H__
+#ifndef MZXMLREADER_H
+#define	MZXMLREADER_H
 
-#ifdef __cplusplus
-extern "C"
-{
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 #include <stdio.h>
@@ -59,8 +58,10 @@ scan_peaks load_scan_peaks(pmzxml_file file, int scan_nr);
 /* Function that unloads the peaks in a scan */
 void unload_scan_peaks(pmzxml_file file, int scan_nr);
 
-#ifdef __cplusplus
+
+#ifdef	__cplusplus
 }
 #endif
 
-#endif
+#endif	/* MZXMLREADER_H */
+

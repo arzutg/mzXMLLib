@@ -52,3 +52,6 @@ char* get_sha1_string(char* file_name)
 
    return result;
 }
+
+
+

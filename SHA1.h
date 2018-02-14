@@ -21,8 +21,12 @@
  *
  */
 
-#ifndef SHA1_H_
-#define SHA1_H_
+#ifndef SHA1_H
+#define	SHA1_H
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /*
  *  This structure will hold context information for the hashing
@@ -51,4 +55,10 @@ void SHA1Input( SHA1Context *,
                 const unsigned char *,
                 unsigned);
 
-#endif /* SHA1_H_ */
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* SHA1_H */
+

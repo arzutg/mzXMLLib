@@ -29,7 +29,7 @@ static int calc_encoding_length(pscan_peaks sp)
 /* Only parses mzxml scans */
 pmzxml_file read_mzxml_file(char* file_name, file_flags fflags, scan_config_flags sflags)
 {
-	return read_mzxml_file_spectrum(file_name, fflags, sflags, 1, INT_MAX);
+    return read_mzxml_file_spectrum(file_name, fflags, sflags, 1, INT_MAX);
 
 }/* pmzxml_file read_mzxml_file(char* file_name, file_flags fflags, scan_config_flags sflags) */
 
@@ -41,10 +41,9 @@ pmzxml_file read_mzxml_file_spectrum(char* file_name, file_flags fflags, scan_co
 
 	pmzxml_file retval = (pmzxml_file) malloc(sizeof(mzxml_file));
 	retval->file_name = file_name;
+        //breakpoint
 	input = fopen(file_name, "rb");
-
 	parse_mzxml_file(retval, input, fflags, sflags, begin_scan, end_scan);
-
 	fclose(input);
 	return retval;
 
@@ -175,7 +174,23 @@ void unload_dataprocessing_struct(dataprocessing dp)
 /* Unloads the msinstrument structure */
 void unload_msinstrument_struct(msinstrument msi)
 {
-	free(msi.content);
+
+        free(msi.mm_category);
+        free(msi.mm_value);
+        free(msi.mod_category);
+        free(msi.mod_value);
+        free(msi.ion_category);
+        free(msi.ion_value);
+        free(msi.ma_category);
+        free(msi.ma_value);
+        free(msi.md_category);
+        free(msi.md_value);
+        free(msi.ins_sw_type);
+        free(msi.ins_sw_name);
+        free(msi.ins_sw_version);
+        free(msi.op_first);
+        free(msi.op_last);
+
 
 }// void unload_msinstrument_struct(msinstrument msi)
 
@@ -510,7 +525,6 @@ scan_peaks load_scan_peaks(pmzxml_file file, int scan_nr)
 	fclose(input);
 	parse_scan_peaks(file->scan_array[scan_nr-1], contents, 0);
 	free(contents);
-
 	return (*(file->scan_array[scan_nr-1]->peaks));
 }
 
