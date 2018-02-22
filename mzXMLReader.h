@@ -14,7 +14,7 @@ extern "C" {
 pmzxml_file read_mzxml_file(char* file_name, file_flags fflags, scan_config_flags sflags);
 
 /* Parses subset of scans */
-pmzxml_file read_mzxml_file_spectrum(char* file_name, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan);
+pmzxml_file read_mzxml_file_spectrum(char* file_name, file_flags fflags, scan_config_flags sflags, int* begin_scan, int* end_scan);
 
 /* Unloads an mzXML file from memory */
 void unload_mzxml_file(pmzxml_file mzXML_file);

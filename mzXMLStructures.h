@@ -251,7 +251,7 @@ typedef struct mzxml_file
 	long			scan_end_offset;	/* offset at which the scan section ends */
 	long*			index_array;		/* array of indices. Arraylength is equal to the number of scans */
 	int*                    scan_id_array;          /* original scan number */
-        int			scan_num;		/* number of scans */
+    int			scan_num;		/* number of scans */
 	char*			index_name;		/* name of the index */
 	char*			sha1;			/* sha1 part */
 

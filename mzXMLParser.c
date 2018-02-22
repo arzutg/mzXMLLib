@@ -52,74 +52,53 @@ static unsigned int ntohl(int nLongNumber)
 
 
 /* Parses the comlete mzXML file */;
-void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan)
+//void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan)
+void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int* begin_scan, int* end_scan)
 {
-	int i, k, scan_order_lower, scan_order_upper;
-        char *tag;
-	//breakpoint
-        parse_file_tail(file, finput);
+	int i;
+	int upper_bound_scan_index, lower_bound_scan_index;
+
+    parse_file_tail(file, finput);
 	parse_index_sequence(file, finput);
 	parse_scan_end(file, finput);
 	parse_msrun_header(file, finput, fflags);
 
+	upper_bound_scan_index = file->scan_num-1;
+	lower_bound_scan_index = 0;
+
 	file->scan_array = (pscan*) malloc(file->scan_num * sizeof(pscan));
 	memset(file->scan_array, 0, file->scan_num * sizeof(pscan));
 
-        printf("\nJUST CHECKING!\n"); fflush(stdout);
-
-        printf("scan_num: %i\n", file->scan_num); fflush(stdout);
-        printf("scan_id_array[2]: %i\n", file->scan_id_array[2]); fflush(stdout);
+	printf("\nscan_id_array[file->scan_num-1]=%i\n", file->scan_id_array[file->scan_num-1]); fflush(stdout);
 
         //Checking and correcting scan intervals w.r.t. scan array of the file
-        //if the end scan given by the user is above or equal to the last scan in the file
-        if(end_scan > file->scan_id_array[file->scan_num-1]){
-           scan_order_upper = file->scan_num - 1;
-           end_scan = file->scan_id_array[scan_order_upper];
-           printf("\nEnd scan provided is too big! Replacing it with the last scan id in the file..."); fflush(stdout);
+        //if the end scan given by the user is above the last scan in the file
+		if(*end_scan > file->scan_id_array[file->scan_num-1]){
+           *end_scan = file->scan_id_array[upper_bound_scan_index];
+           printf("\nEnd scan provided is too big! Replacing it with the last scan id in the file.."); fflush(stdout);
         }
         //if the end scan is below the first scan in the file
-        else if(end_scan < file->scan_id_array[0] ){
+        else if(*end_scan < file->scan_id_array[0] ){
             printf("\nEnd scan provided is outside the scan range! Program exiting..."); fflush(stdout);
         }
-        //find the corresponding upper bound of scan order
-        else{
-            for (k=0; k<file->scan_num; k++){
-                if(end_scan < file->scan_id_array[k]){
-                    scan_order_upper = k-1;
-                    end_scan = file->scan_id_array[scan_order_upper];
-                    break;
-                }
-            }
-        }
-        //if the begin scan given by the user is below the first scan id in the file
-        if(begin_scan < file->scan_id_array[0]){
-           scan_order_lower = 0;
-           begin_scan = file->scan_id_array[0];
+
+		if(*begin_scan < file->scan_id_array[0]){
+           *begin_scan = file->scan_id_array[lower_bound_scan_index];
            printf("\nBegin scan provided is too small! Replacing it with the first scan id in the file..."); fflush(stdout);
         }
-        else if(begin_scan > file->scan_id_array[file->scan_num-1]){
+        else if(*begin_scan > file->scan_id_array[file->scan_num-1]){
             printf("\nBegin scan provided is outside the scan range! Program exiting..."); fflush(stdout);
         }
-        else {
-            for (k=0; k<file->scan_num; k++){
-                if(begin_scan <= file->scan_id_array[k]){
-                    scan_order_lower = k-1;
-                    begin_scan = file->scan_id_array[scan_order_lower];
-                    break;
-                }
-            }
-        }
 
-        if(begin_scan > end_scan){
+        if(*begin_scan > *end_scan){
             printf("\nNo scans found within the given range! Program exiting..."); fflush(stdout);
         }
 
-        printf("\nEnd scan = %i, Begin scan = %i\n", end_scan, begin_scan); fflush(stdout);
-        printf("Scan order upper = %i, Scan order lower = %i\n", scan_order_upper, scan_order_lower); fflush(stdout);
-	for (i=scan_order_lower; i<=scan_order_upper; i++) {
-		file->scan_array[i-1] = (pscan) malloc(sizeof(scan));
-		parse_scan_header(file, i, finput, sflags);
-	}
+        printf("\nBegin scan = %i, End scan = %i\n", *begin_scan,  *end_scan); fflush(stdout);
+        for (i=*begin_scan; i<=*end_scan; i++) {
+        	file->scan_array[i-1] = (pscan) malloc(sizeof(scan));
+        	parse_scan_header(file, i, finput, sflags);
+        }
 }/* void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan) */
 
 
@@ -1086,10 +1065,10 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput)
 	walkptr = read_buffer;
 
 	mzxml_file->index_array = malloc(alloc_count * sizeof(long));
-        mzxml_file->scan_id_array = malloc(alloc_count * sizeof(int));
+    mzxml_file->scan_id_array = malloc(alloc_count * sizeof(int));
 	mzxml_file->scan_num = 0;
-        //If there are no scans within the boundary this returns 0
-        mzxml_file->scan_id_array[0] = 0;
+    //If there are no scans within the boundary this returns 0
+    mzxml_file->scan_id_array[0] = 0;
 
 	//breakpoint
         tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
@@ -1101,15 +1080,14 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput)
 		else if (strstr(tag, MZXML_OFFSET_OTAG)) {
 			tmpbuffer = get_xml_tag_value(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
 			mzxml_file->index_array[mzxml_file->scan_num] = atol(tmpbuffer);
-                        tmpbuffer = get_xml_attribute_value(tag, MZXML_OFFSET_ATTRIB_ID);
-                        mzxml_file->scan_id_array[mzxml_file->scan_num] = atol(tmpbuffer);
-                        printf("\n-Offset id: %i\tScan:%i", atol(tmpbuffer), mzxml_file->scan_num); fflush(stdout);
+            tmpbuffer = get_xml_attribute_value(tag, MZXML_OFFSET_ATTRIB_ID);
+            mzxml_file->scan_id_array[mzxml_file->scan_num] = atol(tmpbuffer);
 			mzxml_file->scan_num += 1;
 			free(tmpbuffer);
 			if (mzxml_file->scan_num == alloc_count) {
 				alloc_count *= 2;
 				mzxml_file->index_array = realloc(mzxml_file->index_array, alloc_count * sizeof(long));
-                                mzxml_file->scan_id_array = realloc(mzxml_file->scan_id_array, alloc_count * sizeof(int));
+                mzxml_file->scan_id_array = realloc(mzxml_file->scan_id_array, alloc_count * sizeof(int));
 			}/* if */
 		}/* else if */
 		tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);

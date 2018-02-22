@@ -18,7 +18,7 @@ extern "C" {
 
 /****************************************** Hidden parsing functions ***********************************************/
 /* Parses the comlete mzXML file */;
-void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan);
+void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_config_flags sflags, int* begin_scan, int* end_scan);
 
 /* Parses the header of the msrun section. also records the offsets of the parentfile and dataprocessing structures */
 void parse_msrun_header(pmzxml_file file, FILE* finput, file_flags fflags);

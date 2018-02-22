@@ -35,13 +35,12 @@ pmzxml_file read_mzxml_file(char* file_name, file_flags fflags, scan_config_flag
 
 
 /* Parses subset of scans */
-pmzxml_file read_mzxml_file_spectrum(char* file_name, file_flags fflags, scan_config_flags sflags, int begin_scan, int end_scan)
+pmzxml_file read_mzxml_file_spectrum(char* file_name, file_flags fflags, scan_config_flags sflags, int* begin_scan, int* end_scan)
 {
 	FILE* input;
 
 	pmzxml_file retval = (pmzxml_file) malloc(sizeof(mzxml_file));
 	retval->file_name = file_name;
-        //breakpoint
 	input = fopen(file_name, "rb");
 	parse_mzxml_file(retval, input, fflags, sflags, begin_scan, end_scan);
 	fclose(input);
