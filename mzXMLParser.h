@@ -13,7 +13,7 @@ extern "C" {
 #define SHORT_HEADER_BUFF_SIZE	4048	/* 4KB buffer size for short headers */
 #define INDEX_REV_BUFF_SIZE		24		/* 24 bytes reverse side size assumption */
 #define INDEX_ELT_BUFF_SIZE		60		/* 60 bytes to find last index element */
-#define READ_BUFF_SIZE			131072	/* 32KB reading buffer as standard */
+#define READ_BUFF_SIZE			323840	/* 320KB reading buffer as standard */
 
 
 /****************************************** Hidden parsing functions ***********************************************/

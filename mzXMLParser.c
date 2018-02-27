@@ -69,8 +69,6 @@ void parse_mzxml_file(pmzxml_file file, FILE* finput, file_flags fflags, scan_co
 	file->scan_array = (pscan*) malloc(file->scan_num * sizeof(pscan));
 	memset(file->scan_array, 0, file->scan_num * sizeof(pscan));
 
-	printf("\nscan_id_array[file->scan_num-1]=%i\n", file->scan_id_array[file->scan_num-1]); fflush(stdout);
-
         //Checking and correcting scan intervals w.r.t. scan array of the file
         //if the end scan given by the user is above the last scan in the file
 		if(*end_scan > file->scan_id_array[file->scan_num-1]){
@@ -943,9 +941,9 @@ void parse_scan_peaks(pscan scan, char* beginptr, FILE* finput)
 	scan->peaks->mzs = malloc(scan->peaks->count * sizeof(double));
 	scan->peaks->intensities = malloc(scan->peaks->count * sizeof(double));
 	len = calc_encoding_length(scan->peaks);
-        printf("\nEncoding length: %i\n",len); fflush(stdout);
+        //printf("\nEncoding length: %i\n",len); fflush(stdout);
 	tmpbuffer = decode_b64(beginptr, len+1, &newlen);
-        printf("beginptr: %s\n",beginptr); fflush(stdout);
+        //printf("beginptr: %s\n",beginptr); fflush(stdout);
 
 	if (scan->peaks->precision == 32) {
 		flcastpointer = (float*)tmpbuffer;
@@ -1071,7 +1069,8 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput)
     mzxml_file->scan_id_array[0] = 0;
 
 	//breakpoint
-        tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
+    tag = get_xml_tag(read_buffer, &walkptr, finput, READ_BUFF_SIZE, &offset);
+
 	while (strstr(tag, MZXML_CTAG) == NULL) {
 		/* finding index tag */
 		if (strstr(tag, MZXML_INDEX_OTAG)) {
@@ -1094,7 +1093,7 @@ void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput)
 	}/* while */
 
 	mzxml_file->index_array = realloc(mzxml_file->index_array, mzxml_file->scan_num * sizeof(long));
-        mzxml_file->scan_id_array = realloc(mzxml_file->scan_id_array, mzxml_file->scan_num * sizeof(int));
+    mzxml_file->scan_id_array = realloc(mzxml_file->scan_id_array, mzxml_file->scan_num * sizeof(int));
 
 }/* void parse_index_sequence(pmzxml_file mzxml_file, FILE* finput) */
 
